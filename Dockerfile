@@ -37,6 +37,19 @@ RUN dpkg --add-architecture i386 && \
     python3 \
     && apt-get clean
 
+RUN apt-get install -y dnsutils
+
+RUN dig files.pythonhosted.org
+
+RUN cat /etc/resolv.conf
+RUN echo nameserver 8.8.8.8 > /etc/resolv.conf
+RUN echo nameserver 8.8.4.4 >> /etc/resolv.conf
+RUN cat /etc/resolv.conf
+
+RUN dig files.pythonhosted.org
+
+RUN python3 -c "import socket; print(socket.gethostbyname('files.pythonhosted.org'))"
+
 # Use java 1.8 because Ubuntu's gradle version doesn't support 1.11
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH=$PATH:$JAVA_HOME
@@ -59,10 +72,10 @@ ADD https://github.com/kollivier/pyeverywhere/archive/$PEW_BRANCH.zip pew.zip
 ADD https://github.com/kollivier/python-for-android/archive/$P4A_BRANCH.zip p4a.zip
 
 # install python dependencies
-RUN pip install cython virtualenv pbxproj && \
+RUN pip3 install cython virtualenv pbxproj && \
   # get kevin's custom packages
-  pip install -e git+https://github.com/kollivier/pyeverywhere@$PEW_BRANCH#egg=pyeverywhere && \
-  pip install -e git+https://github.com/kollivier/python-for-android@$P4A_BRANCH#egg=python-for-android && \
+  pip3 install -e git+https://github.com/kollivier/pyeverywhere@$PEW_BRANCH#egg=pyeverywhere && \
+  pip3 install -e git+https://github.com/kollivier/python-for-android@$P4A_BRANCH#egg=python-for-android && \
   useradd -lm kivy
 
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
