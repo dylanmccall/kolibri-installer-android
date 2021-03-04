@@ -8,8 +8,11 @@ import android_utils
 def start_kolibri_server():
     from kolibri.utils.cli import main
     # activate app mode
+    from kolibri.plugins.utils import disable_plugin
     from kolibri.plugins.utils import enable_plugin
     enable_plugin('kolibri.plugins.app')
+    disable_plugin('kolibri.plugins.learn')
+    enable_plugin('kolibri_explore_plugin')
 
     # register app capabilities
     from kolibri.plugins.app.utils import interface

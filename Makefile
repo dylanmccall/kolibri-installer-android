@@ -17,10 +17,16 @@ deepclean: clean
 	yes y | docker system prune -a || true
 	rm build_docker 2> /dev/null
 
+.PHONY:
+kolibri_explore_plugin.zip:
+	rm -f kolibri_explore_plugin.zip
+	wget 'https://github.com/endlessm/kolibri-explore-plugin/archive/chromeos-demo.zip' -O kolibri_explore_plugin.zip
+
 # Extract the whl file
-src/kolibri: clean
+src/kolibri: clean kolibri_explore_plugin.zip
 	rm -r src/kolibri 2> /dev/null || true
 	unzip -qo "whl/kolibri*.whl" "kolibri/*" -x "kolibri/dist/cext*" -d src/
+	pip install --target=src kolibri_explore_plugin.zip
 	./delete_kolibri_blacklist.sh
 
 # Generate the project info file
@@ -56,8 +62,11 @@ preseeded_kolibri_home:
 	rm -r tmpenv 2> /dev/null || true
 	rm -r src/preseeded_kolibri_home 2> /dev/null || true
 	pip uninstall kolibri 2> /dev/null || true
-	pip install --target tmpenv whl/*.whl
+	pip install --target=tmpenv whl/*.whl
+	pip install --target=tmpenv kolibri_explore_plugin.zip
 	tmpenv/bin/kolibri plugin enable kolibri.plugins.app
+	tmpenv/bin/kolibri plugin disable kolibri.plugins.learn
+	tmpenv/bin/kolibri plugin enable kolibri_explore_plugin
 	tmpenv/bin/kolibri start --port=16294
 	sleep 1
 	tmpenv/bin/kolibri stop
